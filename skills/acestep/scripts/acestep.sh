@@ -315,29 +315,45 @@ query_job_result() {
 
 # Parse query_result response to extract status (0=processing, 1=success, 2=failed)
 # Response is wrapped: {"data": [...], "code": 200, ...}
+# Uses temp file to avoid jq pipe issues with special characters on Windows
 parse_query_status() {
     local response="$1"
-    echo "$response" | jq -r '.data[0].status // .[0].status // 0'
+    local tmp_file=$(mktemp)
+    printf '%s' "$response" > "$tmp_file"
+    jq -r '.data[0].status // .[0].status // 0' "$tmp_file"
+    rm -f "$tmp_file"
 }
 
 # Parse result JSON string from query_result response
 # The result field is a JSON string that needs to be parsed
+# Uses temp file to avoid jq pipe issues with special characters on Windows
 parse_query_result() {
     local response="$1"
-    echo "$response" | jq -r '.data[0].result // .[0].result // "[]"'
+    local tmp_file=$(mktemp)
+    printf '%s' "$response" > "$tmp_file"
+    jq -r '.data[0].result // .[0].result // "[]"' "$tmp_file"
+    rm -f "$tmp_file"
 }
 
 # Extract audio file paths from result (returns newline-separated paths)
+# Uses temp file to avoid jq pipe issues with special characters on Windows
 parse_audio_files() {
     local result="$1"
-    echo "$result" | jq -r '.[]?.file // empty' 2>/dev/null
+    local tmp_file=$(mktemp)
+    printf '%s' "$result" > "$tmp_file"
+    jq -r '.[].file // empty' "$tmp_file" 2>/dev/null
+    rm -f "$tmp_file"
 }
 
 # Extract metas value from result
+# Uses temp file to avoid jq pipe issues with special characters on Windows
 parse_metas_value() {
     local result="$1"
     local key="$2"
-    echo "$result" | jq -r ".[0].metas.$key // .[0].$key // empty" 2>/dev/null
+    local tmp_file=$(mktemp)
+    printf '%s' "$result" > "$tmp_file"
+    jq -r ".[0].metas.$key // .[0].$key // empty" "$tmp_file" 2>/dev/null
+    rm -f "$tmp_file"
 }
 
 # Status command
@@ -360,10 +376,12 @@ cmd_status() {
         1)
             echo "Status: succeeded"
             echo ""
-            local result=$(parse_query_result "$response")
-            local bpm=$(parse_metas_value "$result" "bpm")
-            local keyscale=$(parse_metas_value "$result" "keyscale")
-            local duration=$(parse_metas_value "$result" "duration")
+            local result_file=$(mktemp)
+            parse_query_result "$response" > "$result_file"
+
+            local bpm=$(jq -r '.[0].metas.bpm // .[0].bpm // empty' "$result_file" 2>/dev/null)
+            local keyscale=$(jq -r '.[0].metas.keyscale // .[0].keyscale // empty' "$result_file" 2>/dev/null)
+            local duration=$(jq -r '.[0].metas.duration // .[0].duration // empty' "$result_file" 2>/dev/null)
 
             echo "Result:"
             [ -n "$bpm" ] && echo "  BPM: $bpm"
@@ -372,7 +390,8 @@ cmd_status() {
 
             # Save and download
             save_result "$job_id" "$response"
-            download_audios "$api_url" "$job_id" "$result"
+            download_audios "$api_url" "$job_id" "$result_file"
+            rm -f "$result_file"
             ;;
         2)
             echo "Status: failed"
@@ -385,11 +404,12 @@ cmd_status() {
     esac
 }
 
-# Download audio files from parsed result
+# Download audio files from result file
+# Usage: download_audios <api_url> <job_id> <result_file>
 download_audios() {
     local api_url="$1"
     local job_id="$2"
-    local result="$3"
+    local result_file="$3"
     local api_key=$(load_api_key)
 
     ensure_output_dir
@@ -397,27 +417,69 @@ download_audios() {
     local audio_format=$(get_config "generation.audio_format")
     [ -z "$audio_format" ] && audio_format="mp3"
 
+    # Read result file content and extract audio paths using pipe (avoid temp file path issues on Windows)
+    local result_content
+    result_content=$(cat "$result_file" 2>/dev/null)
+
+    if [ -z "$result_content" ]; then
+        echo -e "  ${RED}Error: Result file is empty or cannot be read${NC}"
+        return 1
+    fi
+
+    # Extract audio paths using pipe instead of file (better Windows compatibility)
+    local audio_paths
+    audio_paths=$(echo "$result_content" | jq -r '.[].file // empty' 2>&1)
+    local jq_exit_code=$?
+
+    if [ $jq_exit_code -ne 0 ]; then
+        echo -e "  ${RED}Error: Failed to parse result JSON${NC}"
+        echo -e "  ${RED}jq error: $audio_paths${NC}"
+        return 1
+    fi
+
+    if [ -z "$audio_paths" ]; then
+        echo -e "  ${YELLOW}No audio files found in result${NC}"
+        return 0
+    fi
+
     local count=1
     while IFS= read -r audio_path; do
+        # Skip empty lines and remove potential Windows carriage return
+        audio_path=$(echo "$audio_path" | tr -d '\r')
         if [ -n "$audio_path" ]; then
             local output_file="${OUTPUT_DIR}/${job_id}_${count}.${audio_format}"
             local download_url="${api_url}${audio_path}"
 
             echo -e "  ${CYAN}Downloading audio $count...${NC}"
+            local curl_output
+            local curl_exit_code
             if [ -n "$api_key" ]; then
-                curl -s -o "$output_file" -H "Authorization: Bearer ${api_key}" "$download_url"
+                curl_output=$(curl -s --connect-timeout 10 --max-time 300 \
+                    -w "%{http_code}" \
+                    -o "$output_file" \
+                    -H "Authorization: Bearer ${api_key}" \
+                    "$download_url" 2>&1)
+                curl_exit_code=$?
             else
-                curl -s -o "$output_file" "$download_url"
+                curl_output=$(curl -s --connect-timeout 10 --max-time 300 \
+                    -w "%{http_code}" \
+                    -o "$output_file" \
+                    "$download_url" 2>&1)
+                curl_exit_code=$?
             fi
 
-            if [ -f "$output_file" ]; then
+            if [ $curl_exit_code -ne 0 ]; then
+                echo -e "  ${RED}Failed to download (curl error $curl_exit_code): $download_url${NC}"
+                rm -f "$output_file" 2>/dev/null
+            elif [ -f "$output_file" ] && [ -s "$output_file" ]; then
                 echo -e "  ${GREEN}Saved: $output_file${NC}"
             else
-                echo -e "  ${RED}Failed to download: $download_url${NC}"
+                echo -e "  ${RED}Failed to download (HTTP $curl_output): $download_url${NC}"
+                rm -f "$output_file" 2>/dev/null
             fi
             count=$((count + 1))
         fi
-    done <<< "$(parse_audio_files "$result")"
+    done <<< "$audio_paths"
 }
 
 # Wait for job and download results
@@ -439,10 +501,12 @@ wait_for_job() {
                 echo -e "${GREEN}Generation completed!${NC}"
                 echo ""
 
-                local result=$(parse_query_result "$response")
-                local bpm=$(parse_metas_value "$result" "bpm")
-                local keyscale=$(parse_metas_value "$result" "keyscale")
-                local duration=$(parse_metas_value "$result" "duration")
+                local result_file=$(mktemp)
+                parse_query_result "$response" > "$result_file"
+
+                local bpm=$(jq -r '.[0].metas.bpm // .[0].bpm // empty' "$result_file" 2>/dev/null)
+                local keyscale=$(jq -r '.[0].metas.keyscale // .[0].keyscale // empty' "$result_file" 2>/dev/null)
+                local duration=$(jq -r '.[0].metas.duration // .[0].duration // empty' "$result_file" 2>/dev/null)
 
                 echo "Metadata:"
                 [ -n "$bpm" ] && echo "  BPM: $bpm"
@@ -455,7 +519,8 @@ wait_for_job() {
 
                 # Download audio files
                 echo "Downloading audio files..."
-                download_audios "$api_url" "$job_id" "$result"
+                download_audios "$api_url" "$job_id" "$result_file"
+                rm -f "$result_file"
 
                 echo ""
                 echo -e "${GREEN}Done! Files saved to: $OUTPUT_DIR${NC}"
