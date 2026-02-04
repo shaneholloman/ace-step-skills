@@ -4,13 +4,30 @@
 
 Claude Code、OpenAI Codex などの AI Agent 向けカスタム Skill。[ACE-Step](https://github.com/ace-step/ACE-Step-1.5) API で音楽を生成します。
 
+## 利用可能な Skills
+
+| Skill | 説明 |
+|-------|------|
+| **acestep** | ACE-Step API による音楽生成 |
+| **acestep-docs** | ドキュメントとトラブルシューティング |
+
 ## 機能
+
+### acestep（音楽生成）
 
 - **テキストから音楽生成** - 説明文から音楽を生成
 - **歌詞生成** - 自動生成または手動指定
 - **オーディオ継続** - 既存の音声から続きを生成
 - **オーディオリペイント** - 音声の特定部分を修正
 - **ランダム生成** - ランダムな音楽サンプルを生成
+
+### acestep-docs（ドキュメント）
+
+- **インストールガイド** - セットアップと設定のヘルプ
+- **GPU 互換性** - VRAM 要件とハードウェア推奨
+- **Gradio UI ガイド** - Web インターフェースの使用方法
+- **推論チューニング** - パラメータ最適化
+- **API リファレンス** - REST API と OpenRouter 統合
 
 ## 前提条件
 
@@ -20,45 +37,59 @@ Claude Code、OpenAI Codex などの AI Agent 向けカスタム Skill。[ACE-St
 
 ### Claude Code
 
-`skills/acestep` フォルダを以下にコピー：
+`skills/` から必要な skill フォルダを以下にコピー：
 
 **プロジェクトレベル**：
 ```
-your-project/.claude/skills/acestep/
+your-project/.claude/skills/
 ```
 
 **グローバルレベル**：
 ```
-~/.claude/skills/acestep/
+~/.claude/skills/
 ```
 
 ### OpenAI Codex
 
-`skills/acestep` フォルダを以下にコピー：
+`skills/` から必要な skill フォルダを以下にコピー：
 
 **プロジェクトレベル**：
 ```
-your-project/.codex/skills/acestep/
+your-project/.codex/skills/
 ```
 
 **グローバルレベル**：
 ```
-~/.codex/skills/acestep/
+~/.codex/skills/
 ```
 
 ### ディレクトリ構造
 
 ```
-skills/acestep/
-├── SKILL.md
-└── scripts/
-    ├── acestep.sh
-    └── config.json
+skills/
+├── acestep/                    # 音楽生成 skill
+│   ├── SKILL.md
+│   └── scripts/
+│       ├── acestep.sh
+│       └── config.json
+└── acestep-docs/               # ドキュメント skill
+    ├── SKILL.md
+    ├── getting-started/
+    │   ├── README.md
+    │   ├── Tutorial.md
+    │   └── ABOUT.md
+    ├── guides/
+    │   ├── GRADIO_GUIDE.md
+    │   ├── INFERENCE.md
+    │   └── GPU_COMPATIBILITY.md
+    └── api/
+        ├── API.md
+        └── Openrouter_API.md
 ```
 
-## 設定
+## 設定（acestep）
 
-`scripts/config.json` を編集：
+`acestep/scripts/config.json` を編集：
 
 ```json
 {
@@ -83,7 +114,7 @@ skills/acestep/
 | `generation.audio_format` | `mp3` | 出力形式 |
 | `generation.vocal_language` | `en` | ボーカル言語 |
 
-## 使用方法
+## 使用方法（acestep）
 
 ### Agent での使用
 
@@ -148,5 +179,6 @@ project_root/
 
 ## 参考
 
-- [SKILL.md](../../skills/acestep/SKILL.md) - API ドキュメント
+- [acestep/SKILL.md](../../skills/acestep/SKILL.md) - 音楽生成 API ドキュメント
+- [acestep-docs/SKILL.md](../../skills/acestep-docs/SKILL.md) - ドキュメント skill インデックス
 - [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) - ACE-Step プロジェクト

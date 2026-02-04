@@ -4,13 +4,30 @@
 
 Claude Code, OpenAI Codex 등 AI Agent용 커스텀 Skill. [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) API로 음악을 생성합니다.
 
+## 사용 가능한 Skills
+
+| Skill | 설명 |
+|-------|------|
+| **acestep** | ACE-Step API를 통한 음악 생성 |
+| **acestep-docs** | 문서 및 문제 해결 |
+
 ## 기능
+
+### acestep (음악 생성)
 
 - **텍스트-음악 변환** - 설명으로 음악 생성
 - **가사 생성** - 자동 생성 또는 수동 지정
 - **오디오 연속** - 기존 오디오에서 계속 생성
 - **오디오 리페인팅** - 오디오의 특정 부분 수정
 - **랜덤 생성** - 랜덤 음악 샘플 생성
+
+### acestep-docs (문서)
+
+- **설치 가이드** - 설치 및 구성 도움말
+- **GPU 호환성** - VRAM 요구 사항 및 하드웨어 권장 사항
+- **Gradio UI 가이드** - 웹 인터페이스 사용법
+- **추론 튜닝** - 파라미터 최적화
+- **API 참조** - REST API 및 OpenRouter 통합
 
 ## 전제 조건
 
@@ -20,45 +37,59 @@ Claude Code, OpenAI Codex 등 AI Agent용 커스텀 Skill. [ACE-Step](https://gi
 
 ### Claude Code
 
-`skills/acestep` 폴더를 복사:
+`skills/`에서 필요한 skill 폴더를 복사:
 
 **프로젝트 레벨**:
 ```
-your-project/.claude/skills/acestep/
+your-project/.claude/skills/
 ```
 
 **글로벌 레벨**:
 ```
-~/.claude/skills/acestep/
+~/.claude/skills/
 ```
 
 ### OpenAI Codex
 
-`skills/acestep` 폴더를 복사:
+`skills/`에서 필요한 skill 폴더를 복사:
 
 **프로젝트 레벨**:
 ```
-your-project/.codex/skills/acestep/
+your-project/.codex/skills/
 ```
 
 **글로벌 레벨**:
 ```
-~/.codex/skills/acestep/
+~/.codex/skills/
 ```
 
 ### 디렉토리 구조
 
 ```
-skills/acestep/
-├── SKILL.md
-└── scripts/
-    ├── acestep.sh
-    └── config.json
+skills/
+├── acestep/                    # 음악 생성 skill
+│   ├── SKILL.md
+│   └── scripts/
+│       ├── acestep.sh
+│       └── config.json
+└── acestep-docs/               # 문서 skill
+    ├── SKILL.md
+    ├── getting-started/
+    │   ├── README.md
+    │   ├── Tutorial.md
+    │   └── ABOUT.md
+    ├── guides/
+    │   ├── GRADIO_GUIDE.md
+    │   ├── INFERENCE.md
+    │   └── GPU_COMPATIBILITY.md
+    └── api/
+        ├── API.md
+        └── Openrouter_API.md
 ```
 
-## 설정
+## 설정 (acestep)
 
-`scripts/config.json` 편집:
+`acestep/scripts/config.json` 편집:
 
 ```json
 {
@@ -82,7 +113,7 @@ skills/acestep/
 | `generation.thinking` | `true` | 5Hz LM 활성화 |
 | `generation.audio_format` | `mp3` | 출력 형식 |
 
-## 사용법
+## 사용법 (acestep)
 
 ### Agent에서 사용
 
@@ -91,6 +122,7 @@ skills/acestep/
 ```
 사용자: 밝은 팝송 만들어줘
 사용자: 봄에 대한 노래 만들어줘
+사용자: 재즈 스타일 배경 음악 생성해줘
 ```
 
 ### 명령줄
@@ -99,12 +131,29 @@ skills/acestep/
 # API 상태 확인
 ./scripts/acestep.sh health
 
-# 음악 생성
+# 음악 생성 - Caption 모드
 ./scripts/acestep.sh generate "Pop music with guitar"
+
+# 음악 생성 - Simple 모드
+./scripts/acestep.sh generate -d "봄에 대한 밝은 노래"
 
 # 랜덤 생성
 ./scripts/acestep.sh random
+
+# 작업 상태 확인
+./scripts/acestep.sh status <job_id>
 ```
+
+### 옵션
+
+| 옵션 | 설명 |
+|-----|------|
+| `-c, --caption` | 음악 스타일 설명 |
+| `-d, --description` | 간단한 설명, LM 자동 생성 |
+| `-l, --lyrics` | 가사 |
+| `--no-thinking` | thinking 모드 비활성화 |
+| `--duration` | 오디오 길이 (초) |
+| `--bpm` | 템포 |
 
 ## 출력
 
@@ -129,5 +178,6 @@ project_root/
 
 ## 참고
 
-- [SKILL.md](../../skills/acestep/SKILL.md) - API 문서
+- [acestep/SKILL.md](../../skills/acestep/SKILL.md) - 음악 생성 API 문서
+- [acestep-docs/SKILL.md](../../skills/acestep-docs/SKILL.md) - 문서 skill 인덱스
 - [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) - ACE-Step 프로젝트

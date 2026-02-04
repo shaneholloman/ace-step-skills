@@ -4,13 +4,30 @@
 
 适用于 Claude Code、OpenAI Codex 等 AI Agent 的自定义 Skill，通过 [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) API 生成音乐。
 
+## 可用 Skills
+
+| Skill | 描述 |
+|-------|------|
+| **acestep** | 通过 ACE-Step API 生成音乐 |
+| **acestep-docs** | 文档和故障排除 |
+
 ## 功能特性
+
+### acestep（音乐生成）
 
 - **文本生成音乐** - 通过描述生成音乐
 - **歌词生成** - 自动生成或手动指定歌词
 - **音频续写** - 基于现有音频继续生成
 - **音频重绘** - 修改音频的特定部分
 - **随机生成** - 随机生成音乐样本
+
+### acestep-docs（文档）
+
+- **安装指南** - 安装和配置帮助
+- **GPU 兼容性** - 显存要求和硬件推荐
+- **Gradio UI 指南** - Web 界面使用
+- **推理调优** - 参数优化
+- **API 参考** - REST API 和 OpenRouter 集成
 
 ## 前置要求
 
@@ -20,45 +37,59 @@
 
 ### Claude Code
 
-将 `skills/acestep` 文件夹复制到：
+将所需的 skill 文件夹从 `skills/` 复制到：
 
 **项目级别**（仅当前项目可用）：
 ```
-your-project/.claude/skills/acestep/
+your-project/.claude/skills/
 ```
 
 **全局级别**（所有项目可用）：
 ```
-~/.claude/skills/acestep/
+~/.claude/skills/
 ```
 
 ### OpenAI Codex
 
-将 `skills/acestep` 文件夹复制到：
+将所需的 skill 文件夹从 `skills/` 复制到：
 
 **项目级别**：
 ```
-your-project/.codex/skills/acestep/
+your-project/.codex/skills/
 ```
 
 **全局级别**：
 ```
-~/.codex/skills/acestep/
+~/.codex/skills/
 ```
 
 ### 目录结构
 
 ```
-skills/acestep/
-├── SKILL.md
-└── scripts/
-    ├── acestep.sh
-    └── config.json
+skills/
+├── acestep/                    # 音乐生成 skill
+│   ├── SKILL.md
+│   └── scripts/
+│       ├── acestep.sh
+│       └── config.json
+└── acestep-docs/               # 文档 skill
+    ├── SKILL.md
+    ├── getting-started/
+    │   ├── README.md
+    │   ├── Tutorial.md
+    │   └── ABOUT.md
+    ├── guides/
+    │   ├── GRADIO_GUIDE.md
+    │   ├── INFERENCE.md
+    │   └── GPU_COMPATIBILITY.md
+    └── api/
+        ├── API.md
+        └── Openrouter_API.md
 ```
 
-## 配置说明
+## 配置说明（acestep）
 
-编辑 `scripts/config.json` 配置 API 连接和默认参数：
+编辑 `acestep/scripts/config.json` 配置 API 连接和默认参数：
 
 ```json
 {
@@ -84,7 +115,7 @@ skills/acestep/
 | `generation.audio_format` | `mp3` | 输出格式 (mp3/wav/flac) |
 | `generation.vocal_language` | `en` | 人声语言 |
 
-## 使用方式
+## 使用方式（acestep）
 
 ### 在 Agent 中使用
 
@@ -154,5 +185,6 @@ project_root/
 
 ## 参考文档
 
-- [SKILL.md](../../skills/acestep/SKILL.md) - 完整 API 文档
+- [acestep/SKILL.md](../../skills/acestep/SKILL.md) - 音乐生成 API 文档
+- [acestep-docs/SKILL.md](../../skills/acestep-docs/SKILL.md) - 文档 skill 索引
 - [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) - ACE-Step 项目

@@ -4,13 +4,30 @@
 
 Custom Skills for AI Agents (Claude Code, OpenAI Codex, etc.) to generate music via [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) API.
 
+## Available Skills
+
+| Skill | Description |
+|-------|-------------|
+| **acestep** | Music generation via ACE-Step API |
+| **acestep-docs** | Documentation and troubleshooting |
+
 ## Features
+
+### acestep (Music Generation)
 
 - **Text-to-Music** - Generate music from descriptions
 - **Lyrics Generation** - Auto-generate or manually specify lyrics
 - **Audio Continuation** - Continue from existing audio
 - **Audio Repainting** - Modify specific parts of audio
 - **Random Generation** - Generate random music samples
+
+### acestep-docs (Documentation)
+
+- **Installation Guide** - Setup and configuration help
+- **GPU Compatibility** - VRAM requirements and hardware recommendations
+- **Gradio UI Guide** - Web interface usage
+- **Inference Tuning** - Parameter optimization
+- **API Reference** - REST API and OpenRouter integration
 
 ## Prerequisites
 
@@ -20,45 +37,59 @@ Custom Skills for AI Agents (Claude Code, OpenAI Codex, etc.) to generate music 
 
 ### Claude Code
 
-Copy `skills/acestep` folder to:
+Copy desired skill folders from `skills/` to:
 
 **Project level** (current project only):
 ```
-your-project/.claude/skills/acestep/
+your-project/.claude/skills/
 ```
 
 **Global level** (all projects):
 ```
-~/.claude/skills/acestep/
+~/.claude/skills/
 ```
 
 ### OpenAI Codex
 
-Copy `skills/acestep` folder to:
+Copy desired skill folders from `skills/` to:
 
 **Project level**:
 ```
-your-project/.codex/skills/acestep/
+your-project/.codex/skills/
 ```
 
 **Global level**:
 ```
-~/.codex/skills/acestep/
+~/.codex/skills/
 ```
 
 ### Directory Structure
 
 ```
-skills/acestep/
-├── SKILL.md
-└── scripts/
-    ├── acestep.sh
-    └── config.json
+skills/
+├── acestep/                    # Music generation skill
+│   ├── SKILL.md
+│   └── scripts/
+│       ├── acestep.sh
+│       └── config.json
+└── acestep-docs/               # Documentation skill
+    ├── SKILL.md
+    ├── getting-started/
+    │   ├── README.md
+    │   ├── Tutorial.md
+    │   └── ABOUT.md
+    ├── guides/
+    │   ├── GRADIO_GUIDE.md
+    │   ├── INFERENCE.md
+    │   └── GPU_COMPATIBILITY.md
+    └── api/
+        ├── API.md
+        └── Openrouter_API.md
 ```
 
-## Configuration
+## Configuration (acestep)
 
-Edit `scripts/config.json` to configure API connection and defaults:
+Edit `acestep/scripts/config.json` to configure API connection and defaults:
 
 ```json
 {
@@ -84,7 +115,7 @@ Edit `scripts/config.json` to configure API connection and defaults:
 | `generation.audio_format` | `mp3` | Output format (mp3/wav/flac) |
 | `generation.vocal_language` | `en` | Vocal language |
 
-## Usage
+## Usage (acestep)
 
 ### In Agent
 
@@ -154,5 +185,6 @@ project_root/
 
 ## References
 
-- [SKILL.md](skills/acestep/SKILL.md) - Full API documentation
+- [acestep/SKILL.md](skills/acestep/SKILL.md) - Music generation API documentation
+- [acestep-docs/SKILL.md](skills/acestep-docs/SKILL.md) - Documentation skill index
 - [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) - ACE-Step project

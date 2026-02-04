@@ -4,13 +4,30 @@
 
 Пользовательские Skills для AI Agents (Claude Code, OpenAI Codex и др.) для генерации музыки через [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) API.
 
+## Доступные Skills
+
+| Skill | Описание |
+|-------|----------|
+| **acestep** | Генерация музыки через ACE-Step API |
+| **acestep-docs** | Документация и устранение неполадок |
+
 ## Возможности
+
+### acestep (Генерация музыки)
 
 - **Текст в музыку** - Генерация музыки из описания
 - **Генерация текста** - Автоматическая или ручная
 - **Продолжение аудио** - Продолжение существующего аудио
 - **Перерисовка аудио** - Изменение отдельных частей
 - **Случайная генерация** - Случайные музыкальные сэмплы
+
+### acestep-docs (Документация)
+
+- **Руководство по установке** - Помощь в настройке
+- **Совместимость GPU** - Требования к VRAM и рекомендации по оборудованию
+- **Руководство Gradio UI** - Использование веб-интерфейса
+- **Настройка инференса** - Оптимизация параметров
+- **Справочник API** - REST API и интеграция с OpenRouter
 
 ## Требования
 
@@ -20,35 +37,59 @@
 
 ### Claude Code
 
-Скопируйте `skills/acestep` в:
+Скопируйте нужные папки skill из `skills/` в:
 
 **Уровень проекта**:
 ```
-your-project/.claude/skills/acestep/
+your-project/.claude/skills/
 ```
 
 **Глобальный**:
 ```
-~/.claude/skills/acestep/
+~/.claude/skills/
 ```
 
 ### OpenAI Codex
 
-Скопируйте `skills/acestep` в:
+Скопируйте нужные папки skill из `skills/` в:
 
 **Уровень проекта**:
 ```
-your-project/.codex/skills/acestep/
+your-project/.codex/skills/
 ```
 
 **Глобальный**:
 ```
-~/.codex/skills/acestep/
+~/.codex/skills/
 ```
 
-## Конфигурация
+### Структура каталогов
 
-Редактируйте `scripts/config.json`:
+```
+skills/
+├── acestep/                    # Skill генерации музыки
+│   ├── SKILL.md
+│   └── scripts/
+│       ├── acestep.sh
+│       └── config.json
+└── acestep-docs/               # Skill документации
+    ├── SKILL.md
+    ├── getting-started/
+    │   ├── README.md
+    │   ├── Tutorial.md
+    │   └── ABOUT.md
+    ├── guides/
+    │   ├── GRADIO_GUIDE.md
+    │   ├── INFERENCE.md
+    │   └── GPU_COMPATIBILITY.md
+    └── api/
+        ├── API.md
+        └── Openrouter_API.md
+```
+
+## Конфигурация (acestep)
+
+Редактируйте `acestep/scripts/config.json`:
 
 ```json
 {
@@ -56,29 +97,85 @@ your-project/.codex/skills/acestep/
   "api_key": "",
   "generation": {
     "thinking": true,
-    "audio_format": "mp3"
+    "use_format": true,
+    "audio_format": "mp3",
+    "vocal_language": "en"
   }
 }
 ```
 
-## Использование
+### Опции
+
+| Опция | По умолчанию | Описание |
+|-------|--------------|----------|
+| `api_url` | `http://127.0.0.1:8001` | Адрес API-сервера |
+| `api_key` | `""` | API-ключ (опционально) |
+| `generation.thinking` | `true` | Включить 5Hz LM (высокое качество) |
+| `generation.audio_format` | `mp3` | Формат вывода |
+
+## Использование (acestep)
 
 ### В Agent
 
 ```
 Пользователь: Создай весёлую поп-песню
 Пользователь: Сгенерируй джазовую музыку
+Пользователь: Создай песню о весне
 ```
 
 ### Командная строка
 
 ```bash
+# Проверить статус API
 ./scripts/acestep.sh health
+
+# Генерация музыки - режим Caption
 ./scripts/acestep.sh generate "Pop music with guitar"
+
+# Генерация музыки - режим Simple
+./scripts/acestep.sh generate -d "Весёлая песня о весне"
+
+# Случайная генерация
 ./scripts/acestep.sh random
+
+# Проверить статус задачи
+./scripts/acestep.sh status <job_id>
 ```
+
+### Опции
+
+| Опция | Описание |
+|-------|----------|
+| `-c, --caption` | Описание музыкального стиля |
+| `-d, --description` | Простое описание, LM генерирует автоматически |
+| `-l, --lyrics` | Текст песни |
+| `--no-thinking` | Отключить режим thinking |
+| `--duration` | Длительность аудио (секунды) |
+| `--bpm` | Темп |
+
+## Вывод
+
+Результаты сохраняются в папку `acestep_output`:
+
+```
+project_root/
+├── acestep_output/
+│   ├── <job_id>.json
+│   ├── <job_id>_1.mp3
+│   └── ...
+```
+
+## Память GPU
+
+| VRAM | Модель LM | Примечание |
+|------|-----------|------------|
+| ≤6GB | Нет | LM отключён |
+| 6-12GB | `acestep-5Hz-lm-0.6B` | Лёгкая |
+| 12-16GB | `acestep-5Hz-lm-1.7B` | Лучшее качество |
+| ≥16GB | `acestep-5Hz-lm-4B` | Лучшее качество |
 
 ## Ссылки
 
-- [SKILL.md](../../skills/acestep/SKILL.md) - Документация API
+- [acestep/SKILL.md](../../skills/acestep/SKILL.md) - Документация API генерации музыки
+- [acestep-docs/SKILL.md](../../skills/acestep-docs/SKILL.md) - Индекс skill документации
 - [ACE-Step](https://github.com/ace-step/ACE-Step-1.5) - Проект ACE-Step
