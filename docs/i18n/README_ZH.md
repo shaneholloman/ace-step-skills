@@ -55,12 +55,12 @@ your-project/.claude/skills/
 
 **项目级别**：
 ```
-your-project/.codex/skills/
+your-project/.agents/skills/
 ```
 
 **全局级别**：
 ```
-~/.codex/skills/
+~/.agents/skills/
 ```
 
 ### 目录结构

@@ -55,12 +55,12 @@ your-project/.claude/skills/
 
 **Уровень проекта**:
 ```
-your-project/.codex/skills/
+your-project/.agents/skills/
 ```
 
 **Глобальный**:
 ```
-~/.codex/skills/
+~/.agents/skills/
 ```
 
 ### Структура каталогов

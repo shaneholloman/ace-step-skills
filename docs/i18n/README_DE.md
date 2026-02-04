@@ -55,12 +55,12 @@ Gewünschte Skill-Ordner aus `skills/` kopieren nach:
 
 **Projektebene**:
 ```
-your-project/.codex/skills/
+your-project/.agents/skills/
 ```
 
 **Global**:
 ```
-~/.codex/skills/
+~/.agents/skills/
 ```
 
 ### Verzeichnisstruktur

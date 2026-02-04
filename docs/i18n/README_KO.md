@@ -55,12 +55,12 @@ your-project/.claude/skills/
 
 **프로젝트 레벨**:
 ```
-your-project/.codex/skills/
+your-project/.agents/skills/
 ```
 
 **글로벌 레벨**:
 ```
-~/.codex/skills/
+~/.agents/skills/
 ```
 
 ### 디렉토리 구조

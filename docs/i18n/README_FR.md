@@ -55,12 +55,12 @@ Copier les dossiers skill souhaités depuis `skills/` vers:
 
 **Niveau projet**:
 ```
-your-project/.codex/skills/
+your-project/.agents/skills/
 ```
 
 **Niveau global**:
 ```
-~/.codex/skills/
+~/.agents/skills/
 ```
 
 ### Structure des Répertoires

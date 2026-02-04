@@ -55,12 +55,12 @@ Copy desired skill folders from `skills/` to:
 
 **Project level**:
 ```
-your-project/.codex/skills/
+your-project/.agents/skills/
 ```
 
 **Global level**:
 ```
-~/.codex/skills/
+~/.agents/skills/
 ```
 
 ### Directory Structure

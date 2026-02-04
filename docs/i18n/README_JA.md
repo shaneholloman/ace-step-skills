@@ -55,12 +55,12 @@ your-project/.claude/skills/
 
 **プロジェクトレベル**：
 ```
-your-project/.codex/skills/
+your-project/.agents/skills/
 ```
 
 **グローバルレベル**：
 ```
-~/.codex/skills/
+~/.agents/skills/
 ```
 
 ### ディレクトリ構造
